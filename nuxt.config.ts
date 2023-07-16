@@ -8,6 +8,7 @@ export default defineNuxtConfig({
     '@pinia/nuxt',
     '@nuxtjs/color-mode',
     '@vite-pwa/nuxt',
+    'vuetify-nuxt-module'
   ],
 
   experimental: {
@@ -17,6 +18,16 @@ export default defineNuxtConfig({
     inlineSSRStyles: false,
     renderJsonPayloads: true,
     typedPages: true,
+  },
+
+  vuetify: {
+    moduleOptions: {
+    },
+    vuetifyOptions: {
+      theme: {
+        defaultTheme: 'dark'
+      }
+    }
   },
 
   css: [
