@@ -9,9 +9,9 @@ const user = useUserStore()
       Hi, {{ user.savedName }}
     </h3>
     <div text-xl>
-        Please add a new Patient 
+      Please add a new Patient
     </div>
-    <PatientForm></PatientForm>
+    <PatientForm />
     <div>
       <NuxtLink
         class="m-3 text-sm btn"
