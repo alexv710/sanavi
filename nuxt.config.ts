@@ -23,6 +23,10 @@ export default defineNuxtConfig({
     '@unocss/reset/tailwind.css',
   ],
 
+  build: {
+    transpile: ['vuetify'],
+  },
+
   colorMode: {
     classSuffix: '',
   },
