@@ -29,3 +29,18 @@ Please adhere to the code of conduct and respect all contributors. Remember, we'
 
 # Note
 While this project aims to simulate a realistic Clinical Information System, it is not intended for real-world usage at its current stage. More so, it's an exploratory project aiming to understand the complexities and challenges of building efficient hospital systems.
+
+# Getting Started
+
+## Database Migration
+
+```bash
+knex init
+
+# Create migration file for table
+knex migrate:make create_patient_table
+
+# fill in needed details in the newly created migrations/... file
+
+knex migrate:latest
+```
