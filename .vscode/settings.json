@@ -8,6 +8,7 @@
   },
   "editor.formatOnSave": false,
   "conventionalCommits.scopes": [
-    "frontend"
+    "frontend",
+    "setup"
   ]
 }

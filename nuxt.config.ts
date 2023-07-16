@@ -8,6 +8,7 @@ export default defineNuxtConfig({
     '@pinia/nuxt',
     '@nuxtjs/color-mode',
     '@vite-pwa/nuxt',
+    'vuetify-nuxt-module'
   ],
 
   experimental: {
@@ -19,13 +20,19 @@ export default defineNuxtConfig({
     typedPages: true,
   },
 
+  vuetify: {
+    moduleOptions: {
+    },
+    vuetifyOptions: {
+      theme: {
+        defaultTheme: 'dark'
+      }
+    }
+  },
+
   css: [
     '@unocss/reset/tailwind.css',
   ],
-
-  build: {
-    transpile: ['vuetify'],
-  },
 
   colorMode: {
     classSuffix: '',
