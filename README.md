@@ -1,5 +1,7 @@
 # Sanavi: An Open-Source Clinical Information System
 
+[Netlify main branch](https://64b480acd2fa4900081cb185--elegant-gumption-1b0a64.netlify.app/)
+
 Sanavi is an ambitious personal project I've undertaken in my spare time. I've often heard complaints about hospital systems being slow, cumbersome, and not particularly user-friendly. Through this project, I'm aiming to explore and tackle the challenges in creating an efficient, user-friendly, and robust Clinical Information System (CIS).
 
 ## About
@@ -41,6 +43,16 @@ knex init
 knex migrate:make create_patient_table
 
 # fill in needed details in the newly created migrations/... file
-
 knex migrate:latest
 ```
+
+## App Start
+
+For development:
+```bash
+pnpm run dev
+```
+
+## Related Resources for Configurations
+
+- Vuetify integration using [Vuetify Nuxt Module](https://vuetify-nuxt-module.netlify.app/)

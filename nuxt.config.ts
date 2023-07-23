@@ -8,7 +8,7 @@ export default defineNuxtConfig({
     '@pinia/nuxt',
     '@nuxtjs/color-mode',
     '@vite-pwa/nuxt',
-    'vuetify-nuxt-module'
+    'vuetify-nuxt-module',
   ],
 
   experimental: {
@@ -24,10 +24,11 @@ export default defineNuxtConfig({
     moduleOptions: {
     },
     vuetifyOptions: {
+      labComponents: true,
       theme: {
-        defaultTheme: 'dark'
-      }
-    }
+        defaultTheme: 'dark',
+      },
+    },
   },
 
   css: [
