@@ -4,8 +4,6 @@ import { ref } from 'vue'
 const valid = ref(false)
 
 const patientStore = usePatientStore()
-const menu = ref()
-const date = ref()
 const isLoading = ref(false)
 const serverResponse = ref(null)
 const error = ref(null)
