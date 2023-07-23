@@ -1,19 +1,21 @@
-// server/api/submit.post.js
+// server/api/patient.post.js
 import pkg from 'pg'
 import { defineEventHandler, readBody } from 'h3'
+
+// Define the database connection
+const runtimeConfig = useRuntimeConfig()
 
 const { Pool } = pkg
 
 const pool = new Pool({
-  user: 'postgres',
-  host: 'localhost',
-  database: 'sanavi',
-  password: 'admin',
+  host: runtimeConfig.dbHost,
+  user: runtimeConfig.dbUser,
+  password: runtimeConfig.dbPassword,
+  database: runtimeConfig.dbName,
   port: 5432,
 })
 
 export default defineEventHandler(async (event) => {
-  console.log(event)
   try {
     const patient = await readBody(event)
 
