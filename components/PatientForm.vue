@@ -16,8 +16,11 @@ async function submitPatient() {
     if (!patientStore.patient)
       return
 
-    const response = await fetch('/api/submit', {
-      method: 'POST',
+    const method = patientStore.patient.id ? 'PUT' : 'POST'
+    const url = patientStore.patient.id ? `/api/patient/${patientStore.patient.id}` : '/api/patient'
+
+    const response = await fetch(url, {
+      method,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -28,6 +31,10 @@ async function submitPatient() {
       throw new Error('Network response was not ok')
 
     serverResponse.value = await response.json()
+
+    // If a new patient was created, you might want to update the patient data with the response data
+    if (method === 'POST')
+      patientStore.setPatientData(serverResponse.value.patient)
   }
   catch (err) {
     error.value = err.message
@@ -87,67 +94,72 @@ const dateOfBirthRules = [
 
 <template>
   <client-only>
-    <v-form v-model="valid">
-      <v-container>
-        <v-row>
-          <!-- Existing Fields -->
-          <v-col cols="12" md="4">
-            <v-text-field
-              v-model="patientStore.patient.firstname" :rules="nameRules" :counter="10" label="First name"
-              required
-            />
-          </v-col>
+    <v-card>
+      <v-form v-model="valid">
+        <v-container>
+          <v-row>
+            <!-- Existing Fields -->
+            <v-col cols="12" md="4">
+              <v-text-field
+                v-model="patientStore.patient.firstname" :rules="nameRules" :counter="10" label="First name"
+                required
+              />
+            </v-col>
 
-          <v-col cols="12" md="4">
-            <v-text-field
-              v-model="patientStore.patient.lastname" :rules="nameRules" :counter="10" label="Last name"
-              required
-            />
-          </v-col>
+            <v-col cols="12" md="4">
+              <v-text-field
+                v-model="patientStore.patient.lastname" :rules="nameRules" :counter="10" label="Last name"
+                required
+              />
+            </v-col>
 
-          <v-col cols="12" md="4">
-            <v-text-field v-model="patientStore.patient.email" :rules="emailRules" label="E-mail" required />
-          </v-col>
+            <v-col cols="12" md="4">
+              <v-text-field v-model="patientStore.patient.email" :rules="emailRules" label="E-mail" required />
+            </v-col>
 
-          <!-- New Fields -->
-          <v-col cols="12" md="4">
-            <v-text-field
-              v-model="patientStore.patient.ahvNumber" :rules="ahvNumberRules" label="AHV Number"
-              required
-            />
-          </v-col>
+            <!-- New Fields -->
+            <v-col cols="12" md="4">
+              <v-text-field
+                v-model="patientStore.patient.ahvNumber" :rules="ahvNumberRules" label="AHV Number"
+                required
+              />
+            </v-col>
 
-          <v-col cols="12" md="4">
-            <v-text-field
-              v-model="patientStore.patient.dateOfBirth" :rules="dateOfBirthRules" label="Date Of Birth"
-              required
-            />
-          </v-col>
-          <!-- Address -->
-          <v-col cols="12" md="4">
-            <v-text-field v-model="patientStore.patient.address.streetName" label="Street" required />
-          </v-col>
+            <v-col cols="12" md="4">
+              <v-text-field
+                v-model="patientStore.patient.dateOfBirth" :rules="dateOfBirthRules" label="Date Of Birth"
+                required
+              />
+            </v-col>
+            <!-- Address -->
+            <v-col cols="12" md="4">
+              <v-text-field v-model="patientStore.patient.address.streetName" label="Street" required />
+            </v-col>
 
-          <v-col cols="12" md="4">
-            <v-text-field v-model="patientStore.patient.address.streetNumber" label="Street Number" required />
-          </v-col>
+            <v-col cols="12" md="4">
+              <v-text-field v-model="patientStore.patient.address.streetNumber" label="Street Number" required />
+            </v-col>
 
-          <v-col cols="12" md="4">
-            <v-text-field v-model="patientStore.patient.address.postalCode" label="Postal Code" required />
-          </v-col>
+            <v-col cols="12" md="4">
+              <v-text-field v-model="patientStore.patient.address.postalCode" label="Postal Code" required />
+            </v-col>
 
-          <v-col cols="12" md="4">
-            <v-text-field v-model="patientStore.patient.address.city" label="City" required />
-          </v-col>
+            <v-col cols="12" md="4">
+              <v-text-field v-model="patientStore.patient.address.city" label="City" required />
+            </v-col>
 
-          <v-col cols="12" md="4">
-            <v-text-field v-model="patientStore.patient.address.canton" label="Canton" required />
-          </v-col>
-        </v-row>
-      </v-container>
-      <v-btn type="submit" :disabled="isLoading" @click="submitPatient">
-        Submit
-      </v-btn>
-    </v-form>
+            <v-col cols="12" md="4">
+              <v-text-field v-model="patientStore.patient.address.canton" label="Canton" required />
+            </v-col>
+          </v-row>
+        </v-container>
+        <v-btn v-if="!patientStore.patient.id" m-4 type="submit" :disabled="isLoading" @click="submitPatient">
+          Create New Patient
+        </v-btn>
+        <v-btn v-if="patientStore.patient.id" m-4 type="submit" :disabled="isLoading" @click="submitPatient">
+          Update Patient Information
+        </v-btn>
+      </v-form>
+    </v-card>
   </client-only>
 </template>
