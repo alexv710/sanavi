@@ -1,0 +1,39 @@
+type Patient {
+  id: ID
+  firstname: String
+  lastname: String
+  gender: String
+  email: String
+  phone: String
+  ahvNumber: String
+  dateOfBirth: String
+  streetName: String
+  streetNumber: String
+  postalCode: String
+  city: String
+  canton: String
+}
+
+type Query {
+  getPatients(firstname: String, lastname: String, ahvNumber: String, dateOfBirth: String): [Patient]
+}
+
+type Mutation {
+  upsertPatient(patientInput: PatientInput!): Patient
+}
+
+input PatientInput {
+  id: String
+  firstname: String
+  lastname: String
+  gender: String
+  email: String
+  phone: String
+  ahvNumber: String
+  dateOfBirth: String
+  streetName: String
+  streetNumber: String
+  postalCode: String
+  city: String
+  canton: String
+}
