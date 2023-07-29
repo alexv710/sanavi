@@ -3,6 +3,7 @@ import type { Patient } from '@/types/Patient'
 
 export const usePatientStore = defineStore('patient', () => {
   const patient: Ref<Patient> = ref({
+    id: '',
     firstname: '',
     lastname: '',
     ahvNumber: '',
@@ -10,13 +11,11 @@ export const usePatientStore = defineStore('patient', () => {
     gender: '',
     phone: '',
     email: '',
-    address: {
-      streetName: '',
-      streetNumber: '',
-      postalCode: '',
-      city: '',
-      canton: '',
-    },
+    streetName: '',
+    streetNumber: '',
+    postalCode: '',
+    city: '',
+    canton: '',
   })
 
   const recentPatients = ref([])
@@ -42,13 +41,11 @@ export const usePatientStore = defineStore('patient', () => {
       gender: '',
       phone: '',
       email: '',
-      address: {
-        streetName: '',
-        streetNumber: '',
-        postalCode: '',
-        city: '',
-        canton: '',
-      },
+      streetName: '',
+      streetNumber: '',
+      postalCode: '',
+      city: '',
+      canton: '',
     }
   }
 
