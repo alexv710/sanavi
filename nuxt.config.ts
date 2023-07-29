@@ -9,7 +9,13 @@ export default defineNuxtConfig({
     '@nuxtjs/color-mode',
     '@vite-pwa/nuxt',
     'vuetify-nuxt-module',
+    '@nuxtjs/apollo',
+    'nuxt-graphql-server',
   ],
+
+  graphqlServer: {
+    // config
+  },
 
   runtimeConfig: {
     dbHost: '',
@@ -25,6 +31,14 @@ export default defineNuxtConfig({
     inlineSSRStyles: false,
     renderJsonPayloads: true,
     typedPages: true,
+  },
+
+  apollo: {
+    clients: {
+      default: {
+        httpEndpoint: 'http://localhost:3000/api/graphql',
+      },
+    },
   },
 
   vuetify: {
