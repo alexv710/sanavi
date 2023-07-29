@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { ref } from 'vue'
+import gql from 'graphql-tag'
+import { useQuery } from '@vue/apollo-composable'
 
 const patientStore = usePatientStore()
 const patients = ref([])
@@ -14,29 +16,51 @@ function editPatient(patient) {
   }
   else {
     // set the patient in the store and update selectedPatientId
-    patientStore.setPatientData(patient.raw)
-    selectedPatientId.value = patient.raw.id
+    patientStore.setPatientData(patient.selectable)
+    selectedPatientId.value = patient.selectable.id
   }
 }
 
-onMounted(async () => {
-  try {
-    const response = await fetch('/api/patients')
-
-    if (!response.ok)
-      throw new Error('Network response was not ok')
-
-    const data = await response.json()
-    console.log(data)
-    patients.value = data.body.patients.map(patient => ({
-      ...patient,
-      address1: `${patient.streetName} ${patient.streetNumber}, ${patient.postalCode} ${patient.city} (${patient.canton})`,
-    }))
+const GET_PATIENTS = gql`
+  query GetPatients($firstname: String, $lastname: String, $ahvNumber: String, $dateOfBirth: String) {
+    getPatients(firstname: $firstname, lastname: $lastname, ahvNumber: $ahvNumber, dateOfBirth: $dateOfBirth) {
+      id
+      firstname
+      lastname
+      gender
+      email
+      phone
+      ahvNumber
+      dateOfBirth
+      streetName
+      streetNumber
+      postalCode
+      city
+      canton
+    }
   }
+`
 
-  catch (err) {
-    console.error(err)
-  }
+const { onResult, refetch } = useQuery(GET_PATIENTS)
+
+function parseDate(dateTimestamp) {
+  console.log(dateTimestamp)
+  const date = new Intl.DateTimeFormat('en-GB', { dateStyle: 'long' }).format(dateTimestamp)
+  console.log(date)
+
+  return `${date}`
+}
+
+onResult(({ data }) => {
+  patients.value = data.getPatients.map(patient => ({
+    ...patient,
+    dateOfBirth: parseDate(patient.dateOfBirth),
+    address1: `${patient.streetName} ${patient.streetNumber}, ${patient.postalCode} ${patient.city} (${patient.canton})`,
+  }))
+})
+
+onMounted(() => {
+  refetch()
 })
 
 const headers = [
@@ -53,17 +77,20 @@ const headers = [
 </script>
 
 <template>
-  <div m-10>
-    <v-text-field v-model="search" append-icon="mdi-magnify" label="Search" single-line hide-details />
+  <client-only>
+    <div m-10>
+      <v-text-field v-model="search" append-icon="mdi-magnify" label="Search" single-line hide-details />
 
-    <v-data-table :headers="headers" :items="patients" :search="search">
-      <template #item.actions="{ item }">
-        <v-btn
-          :text="selectedPatientId === item.raw.id ? 'selected' : 'edit'"
-          :color="selectedPatientId === item.raw.id ? 'red' : 'primary'"
-          @click="editPatient(item)"
-        />
-      </template>
-    </v-data-table>
-  </div>
+      <v-data-table :headers="headers" :items="patients" :search="search">
+        <template #item.actions="{ item }">
+          <v-btn
+            :text="selectedPatientId === item.raw.id ? 'selected' : 'edit'"
+            :color="selectedPatientId === item.raw.id ? 'red' : 'primary'"
+            @click="editPatient(item)"
+          />
+          <v-btn text="add" />
+        </template>
+      </v-data-table>
+    </div>
+  </client-only>
 </template>

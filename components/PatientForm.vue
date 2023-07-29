@@ -1,47 +1,119 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import gql from 'graphql-tag'
+import { useMutation } from '@vue/apollo-composable'
 
 const valid = ref(false)
 
 const patientStore = usePatientStore()
 const isLoading = ref(false)
-const serverResponse = ref(null)
 const error = ref(null)
+const patientInput = { ...patientStore.patient }
+// delete patientInput.address1
+// delete patientInput.__typename
+
+const UPSERT_PATIENT = gql`
+  mutation UpsertPatient($patient: PatientInput!) {
+    upsertPatient(patientInput: $patient) {
+        id
+        firstname
+        lastname
+        gender
+        email
+        phone
+        ahvNumber
+        dateOfBirth
+        streetName
+        streetNumber
+        postalCode
+        city
+        canton
+    }
+  }
+`
+
+const UPSERT_PATIENT_TEST = gql`
+  mutation UpsertPatientTest($patientInput: PatientInput!) {
+    upsertPatientTest(patientInput: $patientInput) {
+      status
+    }
+  }
+`
+const { mutate: upsertPatientTest } = useMutation(UPSERT_PATIENT_TEST)
+
+async function submitTestPatient() {
+  console.log('Starting test mutation...')
+
+  const testPatientInput = {
+    id: '2bec5fcb-2c88-4c72-b6e2-c32cbf305e18',
+    firstname: 'John',
+    lastname: 'Doe',
+    gender: 'F',
+    email: 'john.doe@example.com',
+    phone: '+41123456789',
+    ahvNumber: '756.1234.1234.12',
+    dateOfBirth: '01.01.1990',
+    streetName: 'Some Street',
+    streetNumber: '123',
+    postalCode: '12345',
+    city: 'Some City',
+    canton: 'Some Canton',
+  }
+
+  const result = upsertPatientTest({ patientInput: testPatientInput },
+  ).then((result) => {
+    console.log('Mutation result:', result)
+  }).catch((error) => {
+    console.error('Mutation error:', error)
+  })
+
+  console.log('Test mutation result:', result)
+}
+
+const { mutate: upsertPatient, onDone, onError } = useMutation(UPSERT_PATIENT)
+
+onDone(({ data }) => {
+  patientStore.setPatientData(data.upsertPatient)
+  isLoading.value = false
+})
+
+onError((err) => {
+  error.value = err.message
+  isLoading.value = false
+})
 
 async function submitPatient() {
+  console.log(patientInput)
+  if (!valid.value || !patientStore.patient)
+    return
+
   isLoading.value = true
   error.value = null
-
-  try {
-    if (!patientStore.patient)
-      return
-
-    const method = patientStore.patient.id ? 'PUT' : 'POST'
-    const url = patientStore.patient.id ? `/api/patient/${patientStore.patient.id}` : '/api/patient'
-
-    const response = await fetch(url, {
-      method,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(patientStore.patient),
-    })
-
-    if (!response.ok)
-      throw new Error('Network response was not ok')
-
-    serverResponse.value = await response.json()
-
-    // If a new patient was created, you might want to update the patient data with the response data
-    if (method === 'POST')
-      patientStore.setPatientData(serverResponse.value.patient)
+  console.log('upsert')
+  const PatientInput = {
+    id: patientStore.patient.id,
+    firstname: patientStore.patient.firstname,
+    lastname: patientStore.patient.lastname,
+    gender: patientStore.patient.gender,
+    email: patientStore.patient.email,
+    phone: patientStore.patient.phone,
+    ahvNumber: patientStore.patient.ahvNumber,
+    dateOfBirth: patientStore.patient.dateOfBirth,
+    streetName: patientStore.patient.streetName,
+    streetNumber: patientStore.patient.streetNumber,
+    postalCode: patientStore.patient.postalCode,
+    city: patientStore.patient.city,
+    canton: patientStore.patient.canton,
   }
-  catch (err) {
-    error.value = err.message
-  }
-  finally {
-    isLoading.value = false
-  }
+  console.log(PatientInput)
+  const test = upsertPatient({
+    patient: PatientInput, // patientStore.patient,
+  }).then((result) => {
+    console.log('Mutation result:', result)
+  }).catch((error) => {
+    console.error('Mutation error:', error)
+  })
+  console.log('finished upserting', test)
 }
 
 const nameRules = [
@@ -51,6 +123,14 @@ const nameRules = [
 const emailRules = [
   v => !!v || 'E-mail is required',
   v => /.+@.+\..+/.test(v) || 'E-mail must be valid',
+]
+
+const phoneRules = [
+  v => !!v || 'Phone number is required',
+  (v) => {
+    const cleanInput = v.replace(/\s/g, '')
+    return /(^\+41\s?|0)[1-9]\d{1}\s?\d{3}\s?\d{2}\s?\d{2}$/.test(cleanInput) || 'Phone number must be a valid Swiss phone number (+41 79 123 45 67)'
+  },
 ]
 
 const ahvNumberRules = [
@@ -114,7 +194,18 @@ const dateOfBirthRules = [
             </v-col>
 
             <v-col cols="12" md="4">
+              <v-radio-group v-model="patientStore.patient.gender">
+                <v-radio label="Male" value="M" />
+                <v-radio label="Female" value="F" />
+              </v-radio-group>
+            </v-col>
+
+            <v-col cols="12" md="4">
               <v-text-field v-model="patientStore.patient.email" :rules="emailRules" label="E-mail" required />
+            </v-col>
+
+            <v-col cols="12" md="4">
+              <v-text-field v-model.trim="patientStore.patient.phone" :rules="phoneRules" label="Phone" required />
             </v-col>
 
             <!-- New Fields -->
@@ -133,23 +224,23 @@ const dateOfBirthRules = [
             </v-col>
             <!-- Address -->
             <v-col cols="12" md="4">
-              <v-text-field v-model="patientStore.patient.address.streetName" label="Street" required />
+              <v-text-field v-model="patientStore.patient.streetName" label="Street" required />
             </v-col>
 
             <v-col cols="12" md="4">
-              <v-text-field v-model="patientStore.patient.address.streetNumber" label="Street Number" required />
+              <v-text-field v-model="patientStore.patient.streetNumber" label="Street Number" required />
             </v-col>
 
             <v-col cols="12" md="4">
-              <v-text-field v-model="patientStore.patient.address.postalCode" label="Postal Code" required />
+              <v-text-field v-model="patientStore.patient.postalCode" label="Postal Code" required />
             </v-col>
 
             <v-col cols="12" md="4">
-              <v-text-field v-model="patientStore.patient.address.city" label="City" required />
+              <v-text-field v-model="patientStore.patient.city" label="City" required />
             </v-col>
 
             <v-col cols="12" md="4">
-              <v-text-field v-model="patientStore.patient.address.canton" label="Canton" required />
+              <v-text-field v-model="patientStore.patient.canton" label="Canton" required />
             </v-col>
           </v-row>
         </v-container>
